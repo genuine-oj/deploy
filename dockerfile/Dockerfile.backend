@@ -1,0 +1,19 @@
+FROM python:3.10-bullseye
+
+RUN sed -E -i -e 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+
+RUN apt-get update && apt-get install -y git supervisor && \
+    cd /srv && git clone https://github.com/genuine-oj/backend.git server && cd server && \
+    pip3 install -r requirements.txt --no-cache-dir && pip3 install psycopg2 uwsgi --no-cache-dir && \ 
+    mkdir -p /data/problem_files /data/judge_data/submission /data/judge_data/test_data && \
+    apt-get purge -y --auto-remove git && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY ./config/backend-entrypoint.sh /srv/entrypoint.sh
+COPY ./config/uwsgi.ini ./config/supervisord.conf /srv/
+
+WORKDIR /srv
+
+EXPOSE 8080
+
+ENTRYPOINT ["/srv/entrypoint.sh"]
