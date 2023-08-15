@@ -4,12 +4,5 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile/Dockerfile.build-frontend
-    environment:
-      SITE_NAME: GENUINE-O2J   # 站点名称
-      SITE_TITLE: GENUINE-OJ  # 站点标题
-      USE_FOOTER: true        # 是否启用页脚
-      FOOTER_ICP: ICP-XXXXXX  # 网站ICP备案号
-      ALLOW_REGISTER: true    # 是否允许注册（应和后端保持一致以保证用户体验）
-      SENTENCE_PROVIDER: yxzl # 首页句子API接口（可选yxzl|hitokoto）
     volumes:
        - ./data/frontend/:/root/frontend-dist/
