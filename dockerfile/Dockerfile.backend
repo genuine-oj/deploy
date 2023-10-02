@@ -16,4 +16,5 @@ WORKDIR /srv
 
 EXPOSE 8080
 
+RUN chmod +x /srv/entrypoint.sh
 ENTRYPOINT ["/srv/entrypoint.sh"]
