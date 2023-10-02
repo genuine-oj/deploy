@@ -127,8 +127,3 @@ services:
       SUPERUSER_USERNAME: ${SUPERUSER_USERNAME:-admin}
       SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-123456}
       SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@genuine.og}
-  # celery:
-  #   image: genuine-oj/backend:latest
-  #   build:
-  #     context: .
-  #     dockerfile: ./dockerfile/Dockerfile.backend
