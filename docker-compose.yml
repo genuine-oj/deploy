@@ -112,5 +112,4 @@ services:
       OJ_JUDGE_HOST: oj-judge-server
       OJ_PROBLEM_FILE_ROOT: /data/problem_files/
       OJ_JUDGE_DATA_ROOT: /data/judge_data/
-      OJ_ALLOW_REGISTER: TRUE
       UWSGI_PORT: 8080
