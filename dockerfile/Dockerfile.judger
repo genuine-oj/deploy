@@ -30,4 +30,5 @@ WORKDIR /code
 ADD ./config/unbuffer.c ./config/judger-entrypoint.sh /code/
 RUN gcc -shared -fPIC -o unbuffer.so unbuffer.c
 EXPOSE 8080
+RUN chmod +x /code/judger-entrypoint.sh
 ENTRYPOINT ["/code/judger-entrypoint.sh"]
