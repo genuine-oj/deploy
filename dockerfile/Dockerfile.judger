@@ -2,7 +2,11 @@ FROM ubuntu:20.04
 
 COPY config/java_policy /etc
 
-RUN sed -E -i -e 's/(archive|ports).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' -e '/security.ubuntu.com/d' /etc/apt/sources.list
+ARG USE_MIRROR
+
+RUN if [ "$USE_MIRROR" = "true" ]; then \
+    sed -E -i -e 's/(archive|ports).ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' -e '/security.ubuntu.com/d' /etc/apt/sources.list; \
+    fi
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN buildDeps='software-properties-common git libtool cmake python3-dev python3-pip libseccomp-dev curl' && \
@@ -11,17 +15,32 @@ RUN buildDeps='software-properties-common git libtool cmake python3-dev python3-
     update-alternatives --install  /usr/bin/gcc gcc /usr/bin/gcc-9 40 && \
     update-alternatives --install  /usr/bin/g++ g++ /usr/bin/g++-9 40 && \
     echo "STAGE 0 [\033[32mPASS\033[0m]" && \
-    cd /tmp && git clone https://ghproxy.com/https://github.com/genuine-oj/judger-core.git core && cd core && \
+    cd /tmp
+RUN if [ "$USE_MIRROR" = "true" ]; then \
+    git clone https://ghproxy.com/https://github.com/genuine-oj/judger-core.git core; \
+    else \
+    git clone https://github.com/genuine-oj/judger-core.git core; \
+    fi
+RUN cd core && \
     mkdir build && cd build && cmake .. && make && make install && cd ../wrapper && \
     python3 setup.py install && \
-    echo "STAGE 1 [\033[32mPASS\033[0m]" && \
-    mkdir -p /code && cd /code && git clone https://ghproxy.com/https://github.com/genuine-oj/judger.git . && bash deploy.sh
+    echo "STAGE 1 [\033[32mPASS\033[0m]"
+RUN cd /
+RUN if [ "$USE_MIRROR" = "true" ]; then \
+    git clone https://ghproxy.com/https://github.com/genuine-oj/judger.git code; \
+    else \
+    git clone https://github.com/genuine-oj/judger.git code; \
+    fi
+RUN cd /code && bash deploy.sh
 
 COPY ./config/judger-config.py /code/config.py
 
-RUN cd /code && \
-    pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -I --no-cache-dir -r requirements.txt && \
-    echo "STAGE 2 [\033[32mPASS\033[0m]" && \
+RUN if [ "$USE_MIRROR" = "true" ]; then \
+    pip3 install -i https://mirrors.aliyun.com/pypi/simple/ -I --no-cache-dir -r /code/requirements.txt; \
+    else \
+    pip3 install -I --no-cache-dir -r /code/requirements.txt; \
+    fi
+RUN echo "STAGE 2 [\033[32mPASS\033[0m]" && \
     apt-get purge -y --auto-remove $buildDeps && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     echo "STAGE 3 [\033[32mPASS\033[0m]"

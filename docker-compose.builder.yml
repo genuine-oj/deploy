@@ -4,5 +4,9 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile/Dockerfile.build-frontend
+      args:
+        USE_MIRROR: ${USE_MIRROR:-false}
     volumes:
-       - ./data/frontend/:/root/frontend-dist/
+      - ./data/frontend/:/root/frontend-dist/
+    environment:
+      USE_MIRROR: ${USE_MIRROR:-false}

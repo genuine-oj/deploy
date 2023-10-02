@@ -2,7 +2,13 @@ FROM node:18
 
 WORKDIR /root
 
-RUN git clone https://ghproxy.com/https://github.com/genuine-oj/frontend-naive.git frontend
+ARG USE_MIRROR
+
+RUN if [ "$USE_MIRROR" = "true" ]; then \
+    git clone https://ghproxy.com/https://github.com/genuine-oj/frontend-naive.git frontend; \
+    else \
+    git clone https://github.com/genuine-oj/frontend-naive.git frontend; \
+    fi
 
 RUN cd frontend && yarn install --registry=https://registry.npmmirror.com
 

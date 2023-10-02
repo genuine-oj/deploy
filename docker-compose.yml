@@ -21,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile/Dockerfile.judger
+      args:
+        USE_MIRROR: ${USE_MIRROR:-false}
     restart: always
     read_only: true
     cap_drop:
@@ -42,7 +44,11 @@ services:
       TEST_CASE_DIR: /srv/test_data
       SPJ_DIR: /srv/spj
     healthcheck:
-      test: ["CMD-SHELL", "timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8080'"]
+      test:
+        [
+          "CMD-SHELL",
+          "timeout 1 bash -c 'cat < /dev/null > /dev/tcp/localhost/8080'"
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -53,7 +59,7 @@ services:
     volumes:
       - ./data/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -64,11 +70,11 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: onlinejudge
-      POSTGRES_USER: onlinejudge
-      POSTGRES_PASSWORD: onlinejudge
+      POSTGRES_DB: ${POSTGRES_DB:-onlinejudge}
+      POSTGRES_USER: ${POSTGRES_USER:-onlinejudge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onlinejudge}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -79,7 +85,7 @@ services:
     volumes:
       - ./data/rabbitmq:/var/lib/rabbitmq/mnesia
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -88,6 +94,8 @@ services:
     build:
       context: .
       dockerfile: ./dockerfile/Dockerfile.backend
+      args:
+        USE_MIRROR: ${USE_MIRROR:-false}
     container_name: oj-backend
     restart: always
     depends_on:
@@ -107,12 +115,20 @@ services:
     environment:
       OJ_MODE: PRODUCTION
       OJ_SQL_HOST: oj-postgres
-      OJ_SQL_USER: onlinejudge
-      OJ_SQL_PASSWORD: onlinejudge
-      OJ_SQL_NAME: onlinejudge
+      OJ_SQL_USER: ${POSTGRES_USER:-onlinejudge}
+      OJ_SQL_PASSWORD: ${POSTGRES_PASSWORD:-onlinejudge}
+      OJ_SQL_NAME: ${POSTGRES_DB:-onlinejudge}
       OJ_REDIS_HOST: oj-redis
       OJ_MQ_HOST: oj-rabbitmq
       OJ_JUDGE_HOST: oj-judge-server
       OJ_PROBLEM_FILE_ROOT: /data/problem_files/
       OJ_JUDGE_DATA_ROOT: /data/judge_data/
       UWSGI_PORT: 8080
+      SUPERUSER_USERNAME: ${SUPERUSER_USERNAME:-admin}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-123456}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@genuine.og}
+  # celery:
+  #   image: genuine-oj/backend:latest
+  #   build:
+  #     context: .
+  #     dockerfile: ./dockerfile/Dockerfile.backend
